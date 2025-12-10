@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Depoimentos recebidos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    main {
+      max-width: 800px;
+      width: 100%;
+    }
+    .resposta {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <header>
+        <h1>Momentos recebidos</h1>
+        <p>Agora é a hora da brincadeira: quem você acha que escreveu cada momento? 😄</p>
+      </header>
+
+      <section id="lista-respostas">
+        <p>Carregando respostas...</p>
+      </section>
+    </article>
+  </main>
+
+  <script>
+    async function carregarRespostas() {
+      const container = document.getElementById('lista-respostas');
+      container.innerHTML = '<p>Carregando respostas...</p>';
+
+      try {
+        const resp = await fetch('/api/respostas');
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          container.innerHTML = '<p>Não foi possível carregar as respostas.</p>';
+          return;
+        }
+
+        const respostas = data.respostas || [];
+
+        if (respostas.length === 0) {
+          container.innerHTML = '<p>Ainda não há momentos cadastrados.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        respostas.forEach((r, index) => {
+          const artigo = document.createElement('article');
+          artigo.className = 'resposta';
+          const numero = index + 1;
+          artigo.innerHTML = `
+            <header>
+              <h2>Resposta ${numero}</h2>
+            </header>
+            <p>${escapeHtml(r.texto)}</p>
+          `;
+          container.appendChild(artigo);
+        });
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p>Erro ao carregar as respostas.</p>';
+      }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br/>');
+    }
+
+    carregarRespostas();
+  </script>
+</body>
+</html>

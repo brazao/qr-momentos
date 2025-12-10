@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Conte o momento que vivemos juntos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    main {
+      max-width: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <header>
+        <h1>Conte o momento que vivemos juntos 💭</h1>
+        <p>
+          Escreva um momento especial que vivemos juntos, do seu ponto de vista,
+          <strong>sem se identificar</strong>. Depois eu irei tentar adivinhar quem escreveu o quê.
+        </p>
+      </header>
+
+      <form id="form-depoimento">
+        <label for="texto">
+          Descreva o momento
+          <textarea id="texto" name="texto" rows="6" placeholder="Conte aqui o momento que vivemos juntos..." required></textarea>
+        </label>
+
+        <small>Não coloque seu nome ou pistas muito óbvias 😉</small>
+
+        <button type="submit">Enviar</button>
+
+        <p id="mensagem" role="status"></p>
+      </form>
+
+    </article>
+  </main>
+
+  <script>
+    const form = document.getElementById('form-depoimento');
+    const mensagem = document.getElementById('mensagem');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mensagem.textContent = '';
+
+      const texto = document.getElementById('texto').value.trim();
+      if (!texto) {
+        mensagem.textContent = 'Por favor, escreva alguma coisa antes de enviar.';
+        return;
+      }
+
+      try {
+        const resp = await fetch('/api/respostas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ texto })
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          mensagem.textContent = data.erro || 'Não foi possível enviar agora. Tente de novo em instantes.';
+          return;
+        }
+
+        form.reset();
+        mensagem.textContent = 'Depoimento enviado! Obrigado por participar 💚';
+      } catch (err) {
+        console.error(err);
+        mensagem.textContent = 'Ocorreu um erro de conexão. Tente novamente.';
+      }
+    });
+  </script>
+</body>
+</html>
