@@ -63,6 +63,23 @@ app.get('/leitura', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'respostas.html'));
 });
 
+app.all('/admin/limpar', (req, res) => {
+  const token = req.query.token;
+  // Troque "momentoRosi" pelo segredo que você quiser
+  if (token !== 'momentoRosi') {
+    return res.status(403).json({ erro: 'Não autorizado' });
+  }
+
+  db.run('DELETE FROM respostas', [], function (err) {
+    if (err) {
+      console.error('Erro ao limpar respostas:', err);
+      return res.status(500).json({ erro: 'Erro ao limpar respostas.' });
+    }
+    res.json({ ok: true, mensagem: 'Todas as respostas foram apagadas.' });
+  });
+});
+
+
 app.listen(PORT, () => {
   console.log(`Servidor ouvindo em http://localhost:${PORT}`);
 });
